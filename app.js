@@ -1,47 +1,13 @@
 const express = require('express');
 const logger = require('morgan')
 const cors = require('cors');
-const path = require('path')
-const fs = require('fs').promises
-const multer = require('multer')
-const uploadDir = path.join(process.cwd(), 'uploads')
-const storeImage = path.join(process.cwd(), 'images')
+const mongoose = require('mongoose')
 require('dotenv').config();
 const superHeroRouter = require('./api/superhero')
 
 
 const app = express();
-//
-// const storage = multer.diskStorage({
-//     destination: (req, file, cb) => {
-//       cb(null, uploadDir)
-//     },
-//     filename: (req, file, cb) => {
-//       cb(null, file.originalname)
-//     },
-//     limits: {
-//       fileSize: 1048576,
-//     },
-//   })
-  
-//   const upload = multer({
-//     storage: storage,
-//   })
 
-// app.post('/api/superhero/upload', upload.single('picture'), async (req, res, next) => {
-//     // console.log(req.body)
-//     // const { description } = req.body
-//     const { path: temporaryName, originalname } = req.file
-//     const fileName = path.join(storeImage, originalname)
-//     try {
-//       await fs.rename(temporaryName, fileName)
-//     } catch (err) {
-//       await fs.unlink(temporaryName)
-//       return next(err)
-//     }
-//     res.json({ message: 'Файл успешно загружен', status: 200 })
-//   })
-  //
 
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
 
@@ -63,6 +29,20 @@ app.use((req, res) => {
   app.use((err, req, res, next) => {
     res.status(500).json({ message: err.message });
   });
+
+  
+const { DB_HOST } = process.env;
+const PORT = process.env.PORT || 3001
+
+mongoose.connect(DB_HOST, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(()=>app.listen(PORT, () => {
+  console.log(`Database connection successful`)
+})).catch((error) => {
+  console.log(error)
+  return process.exit(1)
+})
   
 module.exports=app
   
